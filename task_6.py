@@ -29,17 +29,49 @@ def greedy_algorithm(items, budget):
 # Dynamic Programming approach
 def dynamic_programming(items, budget):
     item_names = list(items.keys())
+    n = len(item_names)
 
-    # Create a DP table where rows represent up to the i-th item and columns represent budget
-    dp_table = [[0 for x in range(budget + 1)] for y in range(len(items) + 1)]
+    # Створюємо таблицю динамічного програмування
+    dp_table = [
+        [0 for x in range(budget + 1)]
+        for y in range(n + 1)
+    ]
 
-    #TODO Реалізація побудови таблиці оптимального блюда по калоріям для всіх бюджетів
+    # Побудова таблиці
+    for i in range(1, n + 1):
+        name = item_names[i - 1]
+        cost = items[name]["cost"]
+        calories = items[name]["calories"]
 
-    #TODO Реалізація отримання оптимального набору страв через використання обчисленої таблиці
+        for current_budget in range(budget + 1):
+
+            # Якщо страва не поміщається в бюджет
+            if cost > current_budget:
+                dp_table[i][current_budget] = dp_table[i - 1][current_budget]
+
+            else:
+                # Порівнюємо варіант із додаванням страви
+                # та варіант без її додавання
+                dp_table[i][current_budget] = max(
+                    dp_table[i - 1][current_budget],
+                    dp_table[i - 1][current_budget - cost] + calories
+                )
+
+    # Відновлення оптимального набору страв
     chosen_items = []
     temp_budget = budget
 
-    return dp_table[len(items)][budget], budget - temp_budget, chosen_items
+    for i in range(n, 0, -1):
+        if dp_table[i][temp_budget] != dp_table[i - 1][temp_budget]:
+
+            name = item_names[i - 1]
+            chosen_items.append(name)
+
+            temp_budget -= items[name]["cost"]
+
+    chosen_items.reverse()
+    return dp_table[n][budget], budget - temp_budget, chosen_items
+
 
 
 if __name__ == '__main__':
